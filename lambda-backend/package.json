@@ -4,6 +4,9 @@
     "private": true,
     "description": "Lambda Function to track user clicks",
     "author": "Guido García",
+    "scripts": {
+        "deploy-backend": "NODE_ENV=live sls deploy --stage live"
+    },
     "devDependencies": {
         "serverless": "^1.38.0"
     },

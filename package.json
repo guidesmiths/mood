@@ -1,0 +1,19 @@
+{
+  "name": "mood",
+  "version": "1.0.0",
+  "description": "Do you know how your team is feeling? Why don't you ask them?",
+  "main": "index.js",
+  "scripts": {
+    "deploy-front": "aws s3 sync static/ s3://gs-mood-live"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guidesmiths/mood.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/guidesmiths/mood/issues"
+  },
+  "homepage": "https://github.com/guidesmiths/mood#readme"
+}
