@@ -1,7 +1,8 @@
 export const imageDimensions = {
-  firstLevel: 110,
-  secondLevel: 220,
-  thirdLevel: 340
+  '0level': 0,
+  '1level': 110,
+  '2level': 220,
+  '3level': 340
 }
 
 export const imageTags = {

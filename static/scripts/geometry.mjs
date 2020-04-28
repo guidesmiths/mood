@@ -13,14 +13,12 @@ const getAngle = (horizontal,vertical) => {
   if(horizontal<0 && vertical>=0) return calcArcsin(vertical,horizontal)+3/2*Math.PI
 };
 
-const getSpecificity = (tags, distance) => {
-  if (distance < imageDimensions.firstLevel) return tags.slice(0,1)
-  if (distance < imageDimensions.secondLevel) return tags.slice(0,2)
-  if (distance < imageDimensions.thirdLevel) return tags
-  return []
-}
-
 export const getTags = (horizontal,vertical) => {
   const tagSlice = Math.floor(getAngle(horizontal,vertical)/(2*Math.PI/numOfTags))
-  return getSpecificity(imageTags[tagSlice], getDistance(horizontal,vertical))
+  const distance = getDistance(horizontal,vertical)
+  const tags = imageTags[tagSlice].reduce((ac,emotion,idx) => {
+    ac[`level${idx+1}`] = distance>=imageDimensions[`${idx}level`] && distance<=imageDimensions[`3level`] ? emotion : null
+    return ac
+  },{})
+  return tags
 }
