@@ -1,9 +1,9 @@
-export const imageDimensions = {
-  '0level': 0,
-  '1level': 110,
-  '2level': 220,
-  '3level': 340
-}
+export const dimensionsByLevel = {
+  '0': 0,
+  '1': 110,
+  '2': 220,
+  '3': 340
+};
 
 export const imageTags = {
   '0': [ 'Fearful', 'Scared', 'Helpless' ],
@@ -88,4 +88,4 @@ export const imageTags = {
   '79': [ 'Bad', 'Busy', 'Pressured' ],
   '80': [ 'Bad', 'Bored', 'Apathetic' ],
   '81': [ 'Bad', 'Bored', 'Indifferent' ],
-}
+};

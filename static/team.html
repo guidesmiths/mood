@@ -6,7 +6,7 @@
   <meta name='description' content='Listen to your team. Optimize for happiness.'>
   <meta name='keywords' content='team, happiness, emotion, retrospective, mood'>
   <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
-  <script src="scripts/jquery-3.3.1.min.js"></script>
+  <script src="scripts/vendor/jquery-3.3.1.min.js"></script>
 
   <!--
     bootstrap
@@ -79,7 +79,7 @@
   </div>
 
   <script type="module">
-  import { getTags } from './scripts/geometry.mjs'
+  import { getTags } from './scripts/geometry.mjs';
   const BACKEND_BASE = 'https://il1fz437dl.execute-api.eu-west-1.amazonaws.com/live/';
   const POINT_DIAMETER = 12;
   const DEFAULT_TEAM_ID = 'global';
@@ -99,10 +99,10 @@
 
   function drawPoint(team, x, y, timestamp, pid = null) {
     const point = $(('<img>')).attr('src', 'point.png')
-                              .addClass('point')
-                              .css('width', POINT_DIAMETER + 'px')
-                              .css('left', x - POINT_DIAMETER / 2)
-                              .css('top', y - POINT_DIAMETER / 2);
+      .addClass('point')
+      .css('width', POINT_DIAMETER + 'px')
+      .css('left', x - POINT_DIAMETER / 2)
+      .css('top', y - POINT_DIAMETER / 2);
 
     const timeDiff = Date.now() - timestamp;
     const opacity = 1 - 0.025 * timeDiff / (6 * 60 * 60 * 1000);  // substract 0.025 each 6h
@@ -130,8 +130,8 @@
   $(document).ready(() => {
     $('.tip').each((index, tip) => {
       $(tip).tooltip({
-          html: true,
-          title: $('#' + $(tip).data('tip')).html()
+        html: true,
+        title: $('#' + $(tip).data('tip')).html()
       });
     });
 
@@ -142,7 +142,7 @@
 
     const roulette = document.getElementById('roulette');
 
-    $(roulette).on('click', (e) => {
+    $(roulette).on('click', e => {
       const bounds = e.target.getBoundingClientRect();
 
       const x = Math.round(e.clientX - bounds.left);
@@ -157,8 +157,8 @@
         data: JSON.stringify(point),
         dataType: 'json'
       })
-      .done(result => drawPoint(team, x, y, Date.now(), result.pid))
-      .fail(err => alert('Error saving your mood'));
+        .done(result => drawPoint(team, x, y, Date.now(), result.pid))
+        .fail(err => alert('Error saving your mood'));
     });
   });
   </script>

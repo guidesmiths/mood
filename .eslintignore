@@ -1,0 +1,5 @@
+node_modules
+screenshot
+lambda-backend/
+static/assets
+static/scripts/vendor
