@@ -1,5 +1,7 @@
 import { imageDimensions, imageTags } from '../data/index.mjs'
 
+const numOfTags = Object.keys(imageTags).length;
+
 const getDistance = (h,v) => ((h**2+v**2)**(1/2));
 
 const calcArcsin = (a1,a2) => Math.asin(Math.abs(a1)/getDistance(a1,a2));
@@ -19,6 +21,6 @@ const getSpecifity = (tags, distance) => {
 }
 
 export const getTags = (h,v) => {
-  const numOfTag = Math.floor(getAngle(h,v)/(2*Math.PI/Object.keys(imageTags).length))
-  return getSpecifity(imageTags[numOfTag], getDistance(h,v))
+  const tagSlice = Math.floor(getAngle(h,v)/(2*Math.PI/numOfTags))
+  return getSpecifity(imageTags[tagSlice], getDistance(h,v))
 }
