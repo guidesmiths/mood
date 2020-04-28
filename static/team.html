@@ -149,7 +149,7 @@
       const y = Math.round(e.clientY - bounds.top);
       const tags = getTags(x-bounds.width/2, bounds.height/2-y)
       const point = { x, y, tags };
-      console.log(point)
+
       $.ajax({
         url: BACKEND_BASE + '/' + team + '/points',
         type: 'POST',
