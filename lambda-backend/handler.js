@@ -15,7 +15,7 @@ module.exports.points = async (event, _, callback) => {
 
   switch (event.httpMethod) {
   case 'GET': // GET /{team}/points
-    let searchParams = {
+    const searchParams = {
       Bucket: process.env.S3_BUCKET,
       Prefix: `${team}/`
     };
@@ -59,7 +59,7 @@ module.exports.points = async (event, _, callback) => {
     break;
 
   case 'DELETE': // DELETE /{team}/points/{pid}
-    let deleteParams = {
+    const deleteParams = {
       Bucket: process.env.S3_BUCKET,
       Key: `${team}/${event.pathParameters.pid}`
     };
