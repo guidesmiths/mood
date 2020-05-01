@@ -1,4 +1,4 @@
-const debug = require('debug')('guajirobot:mongo');
+const debug = require('debug')('mood:mongo');
 const { MongoClient } = require('mongodb');
 
 module.exports = config => {
@@ -6,73 +6,36 @@ module.exports = config => {
 		const mongo = await MongoClient.connect(config.url, config.options);
 		const db = mongo.db(config.db);
 		debug('Configuring db....');
-		db.collection('users').createIndex({ id: 1 }, { unique: true });
-		db.collection('audit').createIndex({ fn: 1, timestamp: 1, userId: 1 });
-		db.collection('unmatched').createIndex({ language: 1, userId: 1 });
-		db.collection('trivia').createIndex({ userId: 1 });
+		db.collection('points').createIndex({ id: 1 }, { unique: true });
+		db.collection('points').createIndex({ level1: 1, level2: 1, level3: 1 }, { sparse: true });
+		db.collection('points').createIndex({ team: 1, timestamp: 1 });
 
-		const updateProfile = async profile => {
-			debug('Updating profile...');
-			const input = {
-				id: profile.id,
-				username: profile.username,
-				isBot: profile.is_bot,
-				firstName: profile.first_name,
-				lastName: profile.last_name,
-				languageCode: profile.language_code,
-			};
-			const response = await db.collection('users').findOneAndUpdate({ id: input.id }, { $set: input }, { upsert: true, returnNewDocument: true });
-			return response;
+		const getMoodByTeam = async (team) => {
+            debug(`Getting latest mood points from mongo for team ${team}...`);
+			const points = await db.collection('points').find({ team }).toArray();
+			return points.map(point => ({
+				timestamp: new Date(parseInt(point.timestamp)),
+				x: point.x,
+				y: point.y
+			}));
 		};
-
-		const updateLanguage = async (userId, language) => {
-			debug(`Updating language ${language}... for user ${userId}`);
-			const input = {
-				preferredLanguage: language,
-			};
-			const response = await db.collection('users').findOneAndUpdate({ id: userId }, { $set: input }, { upsert: true, returnNewDocument: true });
-			return response;
-		};
-
-		const getUser = async userId => {
-			debug(`Getting profile data for user ${userId}`);
-			const response = await db.collection('users').findOne({ id: userId });
-			return response;
-		};
-
-		const audit = async payload => {
-			debug('Recording a new audited item...');
-			await db.collection('audit').insertOne(payload);
-		};
-
-		const storeUnmatched = async payload => {
-			debug('Storing unmatched output for given input...');
-			await db.collection('unmatched').insertOne(payload);
-		};
-
-		const recordTriviaAnswer = async payload => {
-			debug('Storing trivia outcome...');
-			await db.collection('trivia').updateOne(
-				{ userId: payload.userId, question: payload.question },
-				{ $set: payload },
-				{ upsert: true },
-			);
-		};
-
-		const getTriviaAnswers = async userId => {
-			debug(`Getting trivia answers for user ${userId}...`);
-			const answers = await db.collection('trivia').find({ userId }).toArray();
-			return answers;
-		};
+		
+		const register = async point => {
+            debug(`Storing in mongo for team ${point.team} pid ${point.id}...`);
+			await db.collection('points').insertOne(point);
+			return point.id;
+        };
+        
+        const unregister = async (pid, team) => {
+            debug(`Unregistering from mongo pid ${pid} for team ${team}...`);
+            await db.collection('points').deleteOne({ id: pid });
+            return Promise.resolve();
+        };
 
 		return {
-			updateProfile,
-			updateLanguage,
-			getUser,
-			audit,
-			storeUnmatched,
-			recordTriviaAnswer,
-			getTriviaAnswers,
+			getMoodByTeam,
+            register,
+			unregister,
 		};
 	};
 

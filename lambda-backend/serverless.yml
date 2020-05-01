@@ -12,6 +12,7 @@ provider:
 
   environment:
     S3_BUCKET: ${self:service}-${opt:stage, self:provider.stage}-points
+    STORE_ENGINE: s3
 
   # XXX actions and resources on S3 resources could be more granular
   iamRoleStatements:

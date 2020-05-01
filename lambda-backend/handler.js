@@ -9,7 +9,7 @@ module.exports.process = async event => {
   const handlerByMethod = {
     GET: async () => {
         try {
-            const point = await controller.checkMood(team);
+            const points = await controller.checkMood(team);
             return buildSuccessBody(points);
         }
         catch (err) {
