@@ -15,30 +15,30 @@ module.exports.process = async event => {
         catch (err) {
             return buildErrorBody(err);
         }
-        break;
 
     case 'POST': // POST /{team}/points
         try {
-            const outcome = await controller.registerMood(...JSON.parse(event.body));
+			const outcome = await controller.registerMood({
+                ...JSON.parse(event.body),
+                team,
+            });
             return buildSuccessBody(outcome);
         }
         catch (err) {
             return buildErrorBody(err);
         }
-        break;
 
     case 'DELETE': // DELETE /{team}/points/{pid}
         try {
-            await controller.unregisterMood(event.pathParameters.pid, team);
+            const pid = event.pathParameters.pid;
+            await controller.unregisterMood(pid, team);
             return buildSuccessBody();
         }
         catch (err) {
             return buildErrorBody(err);
         }
-        break;
     default:
         return buildErrorBody(err, 405);
-        break;
     }
 };
 
