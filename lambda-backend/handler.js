@@ -42,12 +42,12 @@ module.exports.process = async event => {
     }
 };
 
-function buildErrorBody(err, code = 500) {
+const buildErrorBody = (err, code = 500) => {
   console.error(err);
   return { statusCode: code };
 }
 
-function buildSuccessBody(data = {}) {
+const buildSuccessBody = (data = {}) => {
   return {
     statusCode: 200,
     body: JSON.stringify(data),

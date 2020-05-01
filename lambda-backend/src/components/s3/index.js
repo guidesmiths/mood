@@ -26,6 +26,16 @@ module.exports = ({ bucket }) => {
             await s3.deleteObject(params).promise();
             return Promise.resolve();
         };
+
+        const extract = key => obj => obj[key];
+        const toPoint = pid => {
+            const [,,x,y,timestamp] = pid.split(':');
+            return {
+                timestamp: new Date(parseInt(timestamp)),
+                x,
+                y,
+            };
+        };
         
         const getMoodByTeam = async (team) => {
             debug(`Getting latest mood points for team ${team}...`);
@@ -35,15 +45,9 @@ module.exports = ({ bucket }) => {
             };
             // XXX paginate to be able to deal with more than 1000 points, see "s3-ls" module
             const { Contents } = await s3.listObjectsV2(searchParams).promise();
-            const points = Contents.map(object => {
-                const point = JSON.parse(object.Body);
-                return {
-                    timestamp: new Date(point.timestamp).getTime(),
-                    x: point.x,
-                    y: point.y
-                };
-            });
-            return points;
+            return Contents
+            .map(extract('Key'))
+            .map(toPoint);
         };
 
 		return {

@@ -9,20 +9,21 @@ module.exports = ({ port }) => {
         app.get('/:team/points', async (req, res) => {
             const team = req.params.team.toLowerCase();
             const points = await controller.checkMood(team);
-            res.sendJson(points);
+            res.json(points);
         });
         
         app.post('/:team/points', async (req, res) => {
             const team = req.params.team.toLowerCase();
-			const pid = await controller.registerMood({
+			const response = await controller.registerMood({
                 ...req.body,
                 team,
             });
-			res.sendJson({ pid });
+			res.json(response);
 		});
         
         app.delete('/:team/points/:pid', async (req, res) => {
             const pid = req.params.pid;
+            const team = req.params.team;
 			await controller.unregisterMood(pid, team);
 			res.sendStatus(200);
 		});
