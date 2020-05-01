@@ -4,7 +4,9 @@
   "description": "Do you know how your team is feeling? Why don't you ask them?",
   "main": "index.js",
   "scripts": {
-    "deploy-front": "aws s3 sync static/ s3://gs-mood-live"
+    "deploy-front": "aws s3 sync static/ s3://gs-mood-live",
+    "lint": "eslint --ext .js,.mjs,.html .",
+    "lint:fix": "eslint --ext .js,.mjs,.html . --fix"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/guidesmiths/mood/issues"
   },
-  "homepage": "https://github.com/guidesmiths/mood#readme"
+  "homepage": "https://github.com/guidesmiths/mood#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-plugin-html": "^6.0.2"
+  }
 }

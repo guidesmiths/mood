@@ -6,7 +6,7 @@
   <meta name='description' content='Listen to your team. Optimize for happiness.'>
   <meta name='keywords' content='team, happiness, emotion, retrospective, mood'>
   <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
-  <script src="scripts/jquery-3.3.1.min.js"></script>
+  <script src="scripts/vendor/jquery-3.3.1.min.js"></script>
 
   <!--
     bootstrap
@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
+  <script type="module" src="./data/index.mjs"></script>
+  <script type="module" src="./scripts/geometry.mjs"></script>
   <style>
     body {
       font-family: Verdana, Geneva, Tahoma, sans-serif
@@ -77,7 +78,8 @@
     <img id='roulette' src='roulette.jpg'>
   </div>
 
-  <script>
+  <script type="module">
+  import { getTags } from './scripts/geometry.mjs';
   const BACKEND_BASE = 'https://il1fz437dl.execute-api.eu-west-1.amazonaws.com/live/';
   const POINT_DIAMETER = 12;
   const DEFAULT_TEAM_ID = 'global';
@@ -97,10 +99,10 @@
 
   function drawPoint(team, x, y, timestamp, pid = null) {
     const point = $(('<img>')).attr('src', 'point.png')
-                              .addClass('point')
-                              .css('width', POINT_DIAMETER + 'px')
-                              .css('left', x - POINT_DIAMETER / 2)
-                              .css('top', y - POINT_DIAMETER / 2);
+      .addClass('point')
+      .css('width', POINT_DIAMETER + 'px')
+      .css('left', x - POINT_DIAMETER / 2)
+      .css('top', y - POINT_DIAMETER / 2);
 
     const timeDiff = Date.now() - timestamp;
     const opacity = 1 - 0.025 * timeDiff / (6 * 60 * 60 * 1000);  // substract 0.025 each 6h
@@ -128,8 +130,8 @@
   $(document).ready(() => {
     $('.tip').each((index, tip) => {
       $(tip).tooltip({
-          html: true,
-          title: $('#' + $(tip).data('tip')).html()
+        html: true,
+        title: $('#' + $(tip).data('tip')).html()
       });
     });
 
@@ -140,13 +142,14 @@
 
     const roulette = document.getElementById('roulette');
 
-    $(roulette).on('click', (e) => {
+    $(roulette).on('click', e => {
       const bounds = e.target.getBoundingClientRect();
 
       const x = Math.round(e.clientX - bounds.left);
       const y = Math.round(e.clientY - bounds.top);
+      const tags = getTags(x-bounds.width/2, bounds.height/2-y);
 
-      const point = { x, y };
+      const point = { x, y, ...tags };
 
       $.ajax({
         url: BACKEND_BASE + '/' + team + '/points',
@@ -154,8 +157,8 @@
         data: JSON.stringify(point),
         dataType: 'json'
       })
-      .done(result => drawPoint(team, x, y, Date.now(), result.pid))
-      .fail(err => alert('Error saving your mood'));
+        .done(result => drawPoint(team, x, y, Date.now(), result.pid))
+        .fail(err => alert('Error saving your mood'));
     });
   });
   </script>

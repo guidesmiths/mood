@@ -1,0 +1,15 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "html"
+  ],
+  "rules": {
+    "indent": [2, 2],
+    "no-console": "warn",
+    "no-eval": "error",
+    "semi": ["error", "always"]
+  }
+}

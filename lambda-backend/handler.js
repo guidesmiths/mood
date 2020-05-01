@@ -8,72 +8,73 @@ const uuid = () => {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
-}
+};
 
 module.exports.points = async (event, _, callback) => {
   const team = event.pathParameters.team.toLowerCase();
 
   switch (event.httpMethod) {
-    case 'GET': // GET /{team}/points
-      let searchParams = {
-        Bucket: process.env.S3_BUCKET,
-        Prefix: `${team}/`
-      };
+  case 'GET': // GET /{team}/points
+    const searchParams = {
+      Bucket: process.env.S3_BUCKET,
+      Prefix: `${team}/`
+    };
 
-      try {
-        // XXX paginate to be able to deal with more than 1000 points, see "s3-ls" module
-        const result = await s3.listObjectsV2(searchParams).promise();
-        const points = result.Contents.map(object => {
-          const key = object.Key; // XXX assert format $team/$uuid-$x-$y
+    try {
+      // XXX paginate to be able to deal with more than 1000 points, see "s3-ls" module
+      const result = await s3.listObjectsV2(searchParams).promise();
+      const points = result.Contents.map(object => {
+        const point = JSON.parse(object.Body);
+        return {
+          timestamp: new Date(point.timestamp).getTime(),
+          x: point.x,
+          y: point.y
+        };
+      });
+      callback(null, buildSuccessBody(points));
+    } catch (err) {
+      callback(null, buildErrorBody(err));
+    }
 
-          return {
-            timestamp: object.LastModified.getTime(), // millis
-            x: key.split("/")[1].split('-')[1],
-            y: key.split("/")[1].split('-')[2]
-          };
-        });
-        callback(null, buildSuccessBody(points));
-      } catch (err) {
-        callback(null, buildErrorBody(err));
-      }
+    break;
 
-      break;
-    case 'POST': // POST /{team}/points
-      let point = JSON.parse(event.body);
+  case 'POST': // POST /{team}/points
+    const point = {...JSON.parse(event.body), timestamp: new Date()};
 
-      let pid = `${uuid()}-${point.x}-${point.y}`;
+    const pid = `${uuid()}-${point.x}-${point.y}`;
 
-      let createParams = {
-        Body: '', // empty, we use the file name (key) to store all the info we need
-        Bucket: process.env.S3_BUCKET,
-        Key: `${team}/${pid}`
-      };
+    const params = {
+      Body: JSON.stringify(point), // only <binary | string> accepted
+      Bucket: process.env.S3_BUCKET,
+      Key: `${team}/${pid}`
+    };
 
-      try {
-        await s3.putObject(createParams).promise();
-        callback(null, buildSuccessBody({pid: pid}));
-      } catch (err) {
-        callback(null, buildErrorBody(err));
-      }
+    try {
+      await s3.putObject(params).promise();
+      callback(null, buildSuccessBody({pid: pid}));
+    } catch (err) {
+      callback(null, buildErrorBody(err));
+    }
 
-      break;
-    case 'DELETE': // DELETE /{team}/points/{pid}
-      let deleteParams = {
-        Bucket: process.env.S3_BUCKET,
-        Key: `${team}/${event.pathParameters.pid}`
-      };
+    break;
 
-      try {
-        await s3.deleteObject(deleteParams).promise();
-        callback(null, buildSuccessBody());
-      } catch (err) {
-        callback(null, buildErrorBody(err));
-      }
+  case 'DELETE': // DELETE /{team}/points/{pid}
+    const deleteParams = {
+      Bucket: process.env.S3_BUCKET,
+      Key: `${team}/${event.pathParameters.pid}`
+    };
 
-      break;
-    default:
-      callback(null, buildErrorBody(err, 405));
-      break;
+    try {
+      await s3.deleteObject(deleteParams).promise();
+      callback(null, buildSuccessBody());
+    } catch (err) {
+      callback(null, buildErrorBody(err));
+    }
+
+    break;
+  default:
+    callback(null, buildErrorBody(err, 405));
+    break;
   }
 };
 
