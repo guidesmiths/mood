@@ -6,8 +6,8 @@ module.exports.process = async event => {
   const team = event.pathParameters.team.toLowerCase();
   const controller = await system.start();
 
-  switch (event.httpMethod) {
-    case 'GET': // GET /{team}/points
+  const handlerByMethod = {
+    GET: async () => {
         try {
             const point = await controller.checkMood(team);
             return buildSuccessBody(points);
@@ -15,8 +15,8 @@ module.exports.process = async event => {
         catch (err) {
             return buildErrorBody(err);
         }
-
-    case 'POST': // POST /{team}/points
+    },
+    POST: async () => {
         try {
 			const outcome = await controller.registerMood({
                 ...JSON.parse(event.body),
@@ -27,8 +27,8 @@ module.exports.process = async event => {
         catch (err) {
             return buildErrorBody(err);
         }
-
-    case 'DELETE': // DELETE /{team}/points/{pid}
+    },
+    DELETE: async () => {
         try {
             const pid = event.pathParameters.pid;
             await controller.unregisterMood(pid, team);
@@ -37,9 +37,13 @@ module.exports.process = async event => {
         catch (err) {
             return buildErrorBody(err);
         }
-    default:
-        return buildErrorBody(err, 405);
-    }
+    },
+    DEFAULT: async () => buildErrorBody(err, 405),
+  }
+
+  const handler = handlerByMethod[event.httpMethod] || handlerByMethod.DEFAULT;
+  await handler();
+
 };
 
 const buildErrorBody = (err, code = 500) => {
