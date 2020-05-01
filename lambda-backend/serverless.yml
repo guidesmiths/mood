@@ -24,7 +24,7 @@ provider:
 
 functions:
   points:
-    handler: handler.points
+    handler: handler.process
     # XXX review if cors is needed once everything is under the same domain + cdn
     events:
       - http:

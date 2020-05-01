@@ -1,81 +1,45 @@
-// XXX include simple rate limiter
-
+require('dotenv').config({ path: `.env.${process.env.SERVICE_ENV || 'local'}` });
 const AWS = require('aws-sdk');
-const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+const system = require('./src/system');
 
-const uuid = () => {
-  return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-};
-
-module.exports.points = async (event, _, callback) => {
+module.exports.process = async event => {
   const team = event.pathParameters.team.toLowerCase();
+  const controller = await system.start();
 
   switch (event.httpMethod) {
-  case 'GET': // GET /{team}/points
-    const searchParams = {
-      Bucket: process.env.S3_BUCKET,
-      Prefix: `${team}/`
-    };
+    case 'GET': // GET /{team}/points
+        try {
+            const point = await controller.checkMood(team);
+            return buildSuccessBody(points);
+        }
+        catch (err) {
+            return buildErrorBody(err);
+        }
+        break;
 
-    try {
-      // XXX paginate to be able to deal with more than 1000 points, see "s3-ls" module
-      const result = await s3.listObjectsV2(searchParams).promise();
-      const points = result.Contents.map(object => {
-        const point = JSON.parse(object.Body);
-        return {
-          timestamp: new Date(point.timestamp).getTime(),
-          x: point.x,
-          y: point.y
-        };
-      });
-      callback(null, buildSuccessBody(points));
-    } catch (err) {
-      callback(null, buildErrorBody(err));
+    case 'POST': // POST /{team}/points
+        try {
+            const outcome = await controller.registerMood(...JSON.parse(event.body));
+            return buildSuccessBody(outcome);
+        }
+        catch (err) {
+            return buildErrorBody(err);
+        }
+        break;
+
+    case 'DELETE': // DELETE /{team}/points/{pid}
+        try {
+            await controller.unregisterMood(event.pathParameters.pid, team);
+            return buildSuccessBody();
+        }
+        catch (err) {
+            return buildErrorBody(err);
+        }
+        break;
+    default:
+        return buildErrorBody(err, 405);
+        break;
     }
-
-    break;
-
-  case 'POST': // POST /{team}/points
-    const point = {...JSON.parse(event.body), timestamp: new Date()};
-
-    const pid = `${uuid()}-${point.x}-${point.y}`;
-
-    const params = {
-      Body: JSON.stringify(point), // only <binary | string> accepted
-      Bucket: process.env.S3_BUCKET,
-      Key: `${team}/${pid}`
-    };
-
-    try {
-      await s3.putObject(params).promise();
-      callback(null, buildSuccessBody({pid: pid}));
-    } catch (err) {
-      callback(null, buildErrorBody(err));
-    }
-
-    break;
-
-  case 'DELETE': // DELETE /{team}/points/{pid}
-    const deleteParams = {
-      Bucket: process.env.S3_BUCKET,
-      Key: `${team}/${event.pathParameters.pid}`
-    };
-
-    try {
-      await s3.deleteObject(deleteParams).promise();
-      callback(null, buildSuccessBody());
-    } catch (err) {
-      callback(null, buildErrorBody(err));
-    }
-
-    break;
-  default:
-    callback(null, buildErrorBody(err, 405));
-    break;
-  }
 };
 
 function buildErrorBody(err, code = 500) {
