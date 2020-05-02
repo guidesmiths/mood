@@ -5,12 +5,27 @@
     "description": "Lambda Function to track user clicks",
     "author": "Guido García",
     "scripts": {
-        "deploy-backend": "NODE_ENV=live sls deploy --stage live"
+        "local": "SERVICE_ENV=local node simulate.js",
+        "lint": "eslint .",
+        "lint-fix": "eslint . --fix",
+        "deploy-backend": "NODE_ENV=live sls deploy --stage live",
+        "precommit": "npm run lint"
     },
     "devDependencies": {
+        "body-parser": "^1.19.0",
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.1.0",
+        "eslint-plugin-html": "^6.0.2",
+        "eslint-plugin-import": "^2.20.2",
+        "express": "^4.17.1",
+        "husky": "^4.2.5",
         "serverless": "^1.38.0"
     },
     "dependencies": {
-        "aws-sdk": "^2.415.0"
+        "aws-sdk": "^2.415.0",
+        "debug": "^4.1.1",
+        "dotenv": "^8.2.0",
+        "mongodb": "^3.5.7",
+        "uuid": "^8.0.0"
     }
 }
