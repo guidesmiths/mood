@@ -18,36 +18,29 @@ module.exports.process = async event => {
 
 	const handlerByMethod = {
 		GET: async () => {
-			try {
-				const points = await controller.checkMood(team);
-				return buildSuccessBody(points);
-			} catch (err) {
-				return buildErrorBody(err);
-			}
+			const points = await controller.checkMood(team);
+			return points;
 		},
 		POST: async () => {
-			try {
-				const outcome = await controller.registerMood({
-					...JSON.parse(event.body),
-					team,
-				});
-				return buildSuccessBody(outcome);
-			} catch (err) {
-				return buildErrorBody(err);
-			}
+			const outcome = await controller.registerMood({
+				...JSON.parse(event.body),
+				team,
+			});
+			return outcome;
 		},
 		DELETE: async () => {
-			try {
-				const { pid } = event.pathParameters;
-				await controller.unregisterMood(pid, team);
-				return buildSuccessBody();
-			} catch (err) {
-				return buildErrorBody(err);
-			}
+			const { pid } = event.pathParameters;
+			await controller.unregisterMood(pid, team);
 		},
-		DEFAULT: async () => buildErrorBody(null, 405),
 	};
 
-	const handler = handlerByMethod[event.httpMethod] || handlerByMethod.DEFAULT;
-	await handler();
+	try {
+		console.log(`Picking handler for method ${event.httpMethod}...`);
+		const handler = handlerByMethod[event.httpMethod];
+		if (!handler) return buildErrorBody(null, 405);
+		const output = await handler();
+		return buildSuccessBody(output);
+	} catch (err) {
+		return buildErrorBody(err);
+	}
 };
