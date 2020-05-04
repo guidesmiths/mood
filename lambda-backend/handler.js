@@ -3,8 +3,8 @@ const system = require('./src/system');
 
 module.exports.process = async event => {
 	const team = event.pathParameters.team.toLowerCase();
-	const controller = await system.start();
-
+	let controller;
+	
 	const buildErrorBody = (err, code = 500) => {
 		console.error(err);
 		return { statusCode: code };
@@ -35,6 +35,7 @@ module.exports.process = async event => {
 	};
 
 	try {
+		controller = await system.start();
 		console.log(`Picking handler for method ${event.httpMethod}...`);
 		const handler = handlerByMethod[event.httpMethod];
 		if (!handler) return buildErrorBody(null, 405);
