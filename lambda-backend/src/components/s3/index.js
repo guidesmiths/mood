@@ -30,7 +30,7 @@ module.exports = ({ bucket }) => {
 		const toPoint = pid => {
 			const [,, x, y, timestamp] = pid.split(':');
 			return {
-				timestamp: new Date(parseInt(timestamp, 10)),
+				timestamp,
 				x,
 				y,
 			};

@@ -14,7 +14,7 @@ module.exports = config => {
 			debug(`Getting latest mood points from mongo for team ${team}...`);
 			const points = await db.collection('points').find({ team }).toArray();
 			return points.map(point => ({
-				timestamp: new Date(parseInt(point.timestamp, 10)),
+				timestamp: point.timestamp,
 				x: point.x,
 				y: point.y,
 			}));
