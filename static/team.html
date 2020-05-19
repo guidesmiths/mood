@@ -147,7 +147,9 @@
 
       const x = Math.round(e.clientX - bounds.left);
       const y = Math.round(e.clientY - bounds.top);
-      const tags = getTags(x-bounds.width/2, bounds.height/2-y);
+			const tags = getTags(x-bounds.width/2, bounds.height/2-y);
+
+			if (Object.values(tags).every(tag=>tag===null)) return;
 
       const point = { x, y, ...tags };
 
