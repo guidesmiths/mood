@@ -12,7 +12,8 @@ module.exports = config => {
 
 		const getMoodByTeam = async team => {
 			debug(`Getting latest mood points from mongo for team ${team}...`);
-			const points = await db.collection('points').find({ team }).toArray();
+			const query = team === config.globalTeam ? {} : { team };
+			const points = await db.collection('points').find(query).toArray();
 			return points.map(point => ({
 				timestamp: point.timestamp,
 				x: point.x,
