@@ -117,9 +117,9 @@
       point.data('pid', pid).addClass('mine');
 
       point.on('click', (e) => {
-        $.ajax({url: BACKEND_BASE + '/' + team + '/points/' + pid, type: 'DELETE'})
-          .done(res => $(e.target).remove())
-          .fail(err => alert('Error removing mood point'));
+				fetch(BACKEND_BASE + '/' + team + '/points/' + pid, {method: 'DELETE'})
+          .then(res => $(e.target).remove())
+          .catch(err => alert('Error removing mood point'));
       });
     }
 
@@ -127,9 +127,10 @@
   }
 
   function loadPoints(team) {
-    $.get(BACKEND_BASE + '/' + team + '/points')
-      .done(points => points.forEach(point => drawPoint(point.team, point.x, point.y, point.timestamp)))
-      .fail(err => alert('Error loading your team\'s mood'));
+		fetch(BACKEND_BASE + '/' + team + '/points', {method: 'GET'})
+			.then(response => response.json())
+      .then(points => points.forEach(point => drawPoint(point.team, point.x, point.y, point.timestamp)))
+      .catch(err => alert('Error loading your team\'s mood'));
   }
 
   $(document).ready(() => {
