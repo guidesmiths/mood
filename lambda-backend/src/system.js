@@ -8,7 +8,7 @@ module.exports.start = async () => {
 	const { storeEngine } = config.mood;
 	console.log(`Starting mood system with store ${storeEngine}`);
 	const storeHandler = {
-		mongo: initMongo({ ...config.mongo, ...config.urlParams }),
+		mongo: initMongo({ ...config.mongo, ...config.queryParams }),
 		s3: initS3(config.s3),
 	};
 	const store = await (storeHandler[storeEngine] || storeHandler.s3).start();
