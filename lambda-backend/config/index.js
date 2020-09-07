@@ -13,7 +13,8 @@ module.exports = {
 	s3: {
 		bucket: process.env.S3_BUCKET,
 	},
-	urlParams: {
-		globalTeam: 'guidesmiths'
+	queryParams: {
+		globalTeam: 'guidesmiths',
+		maxTimeGap: 1*30*24*60*60*1000 // 1 month
 	}
 };

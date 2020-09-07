@@ -12,8 +12,9 @@ module.exports = config => {
 
 		const getMoodByTeam = async team => {
 			debug(`Getting latest mood points from mongo for team ${team}...`);
-			const query = team === config.globalTeam ? {} : { team };
-			const points = await db.collection('points').find(query).toArray();
+			const teamQuery = team === config.globalTeam ? {} : { team };
+			const timeQuery = { timestamp: { $gt : new Date().getTime() - config.maxTimeGap } }
+			const points = await db.collection('points').find({...teamQuery, ...timeQuery}).toArray();
 			return points.map(({timestamp, x, y, team }) => ({ timestamp, x, y, team }));
 		};
 
